@@ -5,11 +5,14 @@ import javax.batch.runtime.context.JobContext;
 import javax.batch.runtime.context.StepContext;
 import javax.inject.Inject;
 
-public class SimpleBatchlet implements javax.batch.api.Batchlet {
+/**
+ * Ridiculously simple Batchlet which succeeds on odd executionIds and fails on even executionIds
+ * Complement to blogpost at www.planetjones.co.uk
+ */
+public class HelloWorldBatchlet implements javax.batch.api.Batchlet {
 
     @Inject JobContext jobContext;
     @Inject StepContext stepContext;
-
 
     @Override
     public String process() throws Exception {
@@ -35,6 +38,5 @@ public class SimpleBatchlet implements javax.batch.api.Batchlet {
     public void stop() throws Exception {
 
     }
-
 
 }

@@ -3,7 +3,7 @@
 <job id="simple-batchlet-job" xmlns="http://xmlns.jcp.org/xml/ns/javaee">
 
     <step id="batchlet-step">
-        <batchlet ref="SimpleBatchlet"/>
+        <batchlet ref="co.uk.planetjones.HelloWorldBatchlet"/>
     </step>
 
 </job>

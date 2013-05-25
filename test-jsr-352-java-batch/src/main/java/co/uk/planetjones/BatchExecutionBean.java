@@ -1,17 +1,15 @@
 package co.uk.planetjones;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-
 import javax.batch.operations.JobOperator;
 import javax.batch.runtime.BatchRuntime;
 import javax.batch.runtime.JobExecution;
 import javax.ejb.Stateless;
-import javax.ejb.EJB;
+import java.util.Properties;
 
+/**
+ * Simple EJB to allow JSR-352 batch jobs to be created, restarted and details viewed
+ * Complement to blogpost at www.planetjones.co.uk
+ */
 @Stateless
 public class BatchExecutionBean {
 

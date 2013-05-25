@@ -14,11 +14,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+/**
+ * Simple servlet to start, restart and view details of JSR-352 Batch Job
+ * Complement to blogpost at www.planetjones.co.uk
+ */
 @WebServlet(name = "BatchJobStartServlet", urlPatterns = BatchJobStartServlet.SERVLET_MAPPING)
 public class BatchJobStartServlet extends HttpServlet {
 
+    enum OperatorAction {
+        START, RESTART, VIEW;
+    }
+
     final static String SERVLET_MAPPING = "/run_batch_job";
-    final static String HYPERLINK = "<a href=\"%s\">%s</a>";
 
     @EJB
     private BatchExecutionBean batchExecutor;
@@ -27,36 +34,35 @@ public class BatchJobStartServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
-        long executionId;
+        OperatorAction action = OperatorAction.valueOf(req.getParameter("action"));
 
-        if (req.getParameter("detailsForExecutionId") != null) {
-            // have a look at what a job is up to
-            executionId = Long.valueOf(req.getParameter("detailsForExecutionId"));
-            JobExecution execution = batchExecutor.getJobExecutionDetails(executionId);
-            this.write("Execution Id \n " + execution, res);
+        long executionId = -1;
 
-        } else if (req.getParameter("restartExecutionId") != null) {
-            // restart a job... ok
-            long executionIdToRestart = Long.valueOf(req.getParameter("restartExecutionId"));
+        if(req.getParameter("executionId") != null) {executionId = Long.valueOf(req.getParameter("executionId"));}
 
-                executionId = batchExecutor.restartJob(executionIdToRestart);
+        switch (action) {
 
+            case START:
+                executionId = batchExecutor.submitJob();
+                this.write(String.format("Batch execution %d is running", executionId), res);
+                break;
+            case RESTART:
+                executionId = batchExecutor.restartJob(executionId);
                 this.write(String.format("Batch execution %d is the result of a restart", executionId), res);
+                break;
+            case VIEW:
+                JobExecution execution = batchExecutor.getJobExecutionDetails(executionId);
+                this.write("Execution Id \n " + execution, res);
+                break;
 
-        } else {
-            // must be a new job you want
-            executionId = batchExecutor.submitJob();
-            this.write(String.format("Batch execution %d is running", executionId), res);
         }
-
 
         String contextPath = req.getContextPath();
 
         this.write("<h2>Options</h2>", res);
-        this.writeLink(contextPath + SERVLET_MAPPING + "?detailsForExecutionId=" + executionId, "View details for Execution Id " + executionId, res);
-        this.writeLink(contextPath + SERVLET_MAPPING + "?restartExecutionId=" + executionId, "Restart Execution Id " + executionId, res);
-        this.writeLink(contextPath + SERVLET_MAPPING, "Submit a new job", res);
-
+        this.writeLink(OperatorAction.VIEW, "View details for Execution Id " + executionId, executionId, req, res);
+        this.writeLink(OperatorAction.RESTART, "Restart Execution Id " + executionId, executionId, req, res);
+        this.writeLink(OperatorAction.START, "Start a new job", null, req, res);
     }
 
     private void write(String message, HttpServletResponse res) throws IOException {
@@ -65,10 +71,13 @@ public class BatchJobStartServlet extends HttpServlet {
         out.println(message);
     }
 
-
-    private void writeLink(String url, String text, HttpServletResponse res) throws IOException {
+    private void writeLink(OperatorAction action, String text, Long executionId, HttpServletRequest req, HttpServletResponse res) throws IOException {
         PrintWriter out = res.getWriter();
-        out.println(String.format(HYPERLINK, url, text));
-        out.println("<br/>");
+        StringBuilder sb = new StringBuilder();
+        sb.append("<a href=\"").append(req.getContextPath()).append(SERVLET_MAPPING).append("?action=").append(action.name());
+        if(executionId != null) {sb.append("&executionId=").append(executionId);}
+        sb.append("\">").append(text).append("</a>");
+        out.println(sb.toString());
+        out.println("<hr/>");
     }
 }
