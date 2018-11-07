@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: co.uk.planetjones.simplecloudtask.PlanetJonesHelloTaskTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.487 s - in co.uk.planetjones.simplecloudtask.PlanetJonesHelloTaskTests
